@@ -1,8 +1,15 @@
-package sso
+package main
+
+import (
+	"github.com/rmntim/sso/internal/config"
+)
 
 func main() {
-  // TODO: init config
-  // TODO: init logging
-  // TODO: init app
-  // TODO: start gRPC server
+	config := config.MustLoad()
+
+	// TODO: init logging
+
+	// TODO: init app
+
+	// TODO: start gRPC server
 }
