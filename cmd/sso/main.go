@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/rmntim/sso/internal/app"
 	"github.com/rmntim/sso/internal/config"
 )
 
@@ -19,9 +20,9 @@ func main() {
 	logger := newLogger(config.Env)
 	logger.Info("starting application", slog.Any("config", config))
 
-	// TODO: init app
+  application := app.New(logger, config.Grpc.Port, config.StoragePath, config.TokenTTL)
 
-	// TODO: start gRPC server
+  application.GRPCApp.MustRun()
 }
 
 func newLogger(env string) *slog.Logger {
