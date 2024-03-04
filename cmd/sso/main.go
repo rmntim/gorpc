@@ -17,11 +17,7 @@ func main() {
 	config := config.MustLoad()
 
 	logger := newLogger(config.Env)
-	logger.Info("starting application",
-		slog.String("env", config.Env),
-		slog.Any("config", config),
-		slog.Int("port", config.Grpc.Port),
-	)
+	logger.Info("starting application", slog.Any("config", config))
 
 	// TODO: init app
 
