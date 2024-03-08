@@ -7,6 +7,7 @@ import (
 
 	authgrpc "github.com/rmntim/sso/internal/grpc/auth"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
@@ -22,6 +23,7 @@ func New(
 	gRPCServer := grpc.NewServer()
 
 	authgrpc.Register(gRPCServer)
+  reflection.Register(gRPCServer)
 
 	return &App{
 		logger:     logger,
