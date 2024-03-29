@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
-  
-  "github.com/rmntim/sso/contracts/gen/go/sso"
+
+	"github.com/rmntim/sso/contracts/gen/go/sso"
 	"google.golang.org/grpc"
 )
 

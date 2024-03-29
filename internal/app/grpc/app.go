@@ -23,7 +23,7 @@ func New(
 	gRPCServer := grpc.NewServer()
 
 	authgrpc.Register(gRPCServer)
-  reflection.Register(gRPCServer)
+	reflection.Register(gRPCServer)
 
 	return &App{
 		logger:     logger,

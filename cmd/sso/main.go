@@ -20,9 +20,9 @@ func main() {
 	logger := newLogger(config.Env)
 	logger.Info("starting application", slog.Any("config", config))
 
-  application := app.New(logger, config.Grpc.Port, config.StoragePath, config.TokenTTL)
+	application := app.New(logger, config.Grpc.Port, config.StoragePath, config.TokenTTL)
 
-  application.GRPCApp.MustRun()
+	application.GRPCApp.MustRun()
 }
 
 func newLogger(env string) *slog.Logger {
