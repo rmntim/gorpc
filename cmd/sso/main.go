@@ -3,6 +3,8 @@ package main
 import (
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/rmntim/sso/internal/app"
 	"github.com/rmntim/sso/internal/config"
@@ -15,14 +17,23 @@ const (
 )
 
 func main() {
-	config := config.MustLoad()
+	cfg := config.MustLoad()
 
-	logger := newLogger(config.Env)
-	logger.Info("starting application", slog.Any("config", config))
+	log := newLogger(cfg.Env)
+	log.Info("starting application", slog.Any("config", cfg))
 
-	application := app.New(logger, config.Grpc.Port, config.StoragePath, config.TokenTTL)
+	application := app.New(log, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenTTL)
 
-	application.GRPCApp.MustRun()
+	go application.GRPCApp.MustRun()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	sign := <-stop
+	log.Info("received signal", slog.String("signal", sign.String()))
+
+	application.GRPCApp.Stop()
+	log.Info("application stopped")
 }
 
 func newLogger(env string) *slog.Logger {
