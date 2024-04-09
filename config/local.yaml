@@ -1,5 +1,5 @@
 env: "local" # dev, prod
-storage_path: "./storage/sso.db"
+storage_path: "postgresql://postgres:postgres@localhost:5432/sso?sslmode=disable"
 token_ttl: 1h
 grpc:
   port: 6969
