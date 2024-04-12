@@ -1,0 +1,33 @@
+version: "3"
+
+env:
+  EXE: server{{exeExt}}
+
+tasks:
+  default:
+    desc: Build and run the server
+    aliases: [run]
+    cmds:
+      - task: build
+      - ./{{.EXE}}
+
+  build:
+    desc: Build the server
+    cmds:
+      - go build -v -o ./{{.EXE}} ./cmd/sso/main.go
+    sources:
+      - "**/*.go"
+    generates:
+      - ./{{.EXE}}
+
+  generate:
+    desc: Generate code
+    cmds:
+      - buf generate
+    sources:
+      - "contracts/proto/**/*.proto"
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf ./{{.EXE}}
