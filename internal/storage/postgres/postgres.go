@@ -2,14 +2,17 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/rmntim/sso/internal/domain/models"
+	"github.com/rmntim/sso/internal/storage"
 )
 
 type Storage struct {
@@ -57,7 +60,11 @@ func (s *Storage) SaveUser(ctx context.Context, email string, passwordHash []byt
 
 	var id int64
 	query := "INSERT INTO users(email, pass_hash) VALUES ($1, $2) RETURNING id"
-	if err := s.db.QueryRow(query, email, passwordHash).Scan(&id); err != nil {
+	if err := s.db.QueryRowContext(ctx, query, email, passwordHash).Scan(&id); err != nil {
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+		}
+
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -68,8 +75,18 @@ func (s *Storage) User(ctx context.Context, email string) (*models.User, error) 
 	const op = "storage.postgres.User"
 
 	var user models.User
+
 	query := "SELECT * FROM users u WHERE u.email = $1"
-	if err := s.db.QueryRow(query, email).Scan(&user.Id, &user.Email, &user.PasswordHash, &user.IsAdmin); err != nil {
+	stmt, err := s.db.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if err := stmt.QueryRowContext(ctx, email).Scan(&user.Id, &user.Email, &user.PasswordHash, &user.IsAdmin); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
+		}
+
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -80,8 +97,17 @@ func (s *Storage) IsAdmin(ctx context.Context, userId int64) (bool, error) {
 	const op = "storage.postgres.IsAdmin"
 
 	var isAdmin bool
+
 	query := "SELECT is_admin FROM users u WHERE u.id = $1"
-	if err := s.db.QueryRow(query, userId).Scan(&isAdmin); err != nil {
+	stmt, err := s.db.Prepare(query)
+	if err != nil {
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if err := stmt.QueryRowContext(ctx, userId).Scan(&isAdmin); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
+		}
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -92,8 +118,17 @@ func (s *Storage) App(ctx context.Context, appId int) (*models.App, error) {
 	const op = "storage.postgres.App"
 
 	var app models.App
+
 	query := "SELECT * FROM apps a WHERE a.id = $1"
-	if err := s.db.QueryRow(query, appId).Scan(&app.Id, &app.Name, &app.Secret); err != nil {
+	stmt, err := s.db.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if err := stmt.QueryRowContext(ctx, appId).Scan(&app.Id, &app.Name, &app.Secret); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%s: %w", op, storage.ErrAppNotFound)
+		}
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
