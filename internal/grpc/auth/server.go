@@ -46,6 +46,9 @@ func (s *serverAPI) Login(ctx context.Context, req *authv1.LoginRequest) (*authv
 		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "invalid credentials")
 		}
+		if errors.Is(err, auth.ErrInvalidAppId) {
+			return nil, status.Error(codes.InvalidArgument, "app not found")
+		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
@@ -79,7 +82,7 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *authv1.IsAdminRequest) (*a
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.UserId)
 	if err != nil {
-		if errors.Is(err, storage.ErrUserNotFound) {
+		if errors.Is(err, auth.ErrInvalidUserId) {
 			return nil, status.Error(codes.NotFound, "user not found")
 		}
 		return nil, status.Error(codes.Internal, "internal error")
