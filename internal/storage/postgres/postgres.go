@@ -48,7 +48,7 @@ func (s *Storage) Migrate() error {
 	}
 
 	err = m.Up()
-	if err != nil {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
