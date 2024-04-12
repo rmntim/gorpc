@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package auth;
+package auth.v1;
 
-option go_package = "rmntim.sso.v1;ssov1";
+option go_package = "rmntim.auth.v1;authv1";
 
-service Auth {
+service AuthService {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);

@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/rmntim/sso/contracts/gen/go/sso"
+	authv1 "github.com/rmntim/sso/contracts/gen/go/auth/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,15 +25,15 @@ type Auth interface {
 }
 
 type serverAPI struct {
-	ssov1.UnimplementedAuthServer
+	authv1.UnimplementedAuthServiceServer
 	auth Auth
 }
 
 func Register(gRPC *grpc.Server, auth Auth) {
-	ssov1.RegisterAuthServer(gRPC, &serverAPI{auth: auth})
+	authv1.RegisterAuthServiceServer(gRPC, &serverAPI{auth: auth})
 }
 
-func (s *serverAPI) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.LoginResponse, error) {
+func (s *serverAPI) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	if err := validateLoginRequest(req); err != nil {
 		return nil, err
 	}
@@ -44,12 +44,12 @@ func (s *serverAPI) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	return &ssov1.LoginResponse{
+	return &authv1.LoginResponse{
 		Token: token,
 	}, nil
 }
 
-func (s *serverAPI) Register(ctx context.Context, req *ssov1.RegisterRequest) (*ssov1.RegisterResponse, error) {
+func (s *serverAPI) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
 	if err := validateRegisterRequest(req); err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func (s *serverAPI) Register(ctx context.Context, req *ssov1.RegisterRequest) (*
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	return &ssov1.RegisterResponse{
+	return &authv1.RegisterResponse{
 		UserId: userId,
 	}, nil
 }
 
-func (s *serverAPI) IsAdmin(ctx context.Context, req *ssov1.IsAdminRequest) (*ssov1.IsAdminResponse, error) {
+func (s *serverAPI) IsAdmin(ctx context.Context, req *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {
 	if err := validateIsAdminRequest(req); err != nil {
 		return nil, err
 	}
@@ -75,12 +75,12 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *ssov1.IsAdminRequest) (*ss
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	return &ssov1.IsAdminResponse{
+	return &authv1.IsAdminResponse{
 		IsAdmin: isAdmin,
 	}, nil
 }
 
-func validateLoginRequest(req *ssov1.LoginRequest) error {
+func validateLoginRequest(req *authv1.LoginRequest) error {
 	if req.Email == "" {
 		return status.Error(codes.InvalidArgument, "email is required")
 	}
@@ -96,7 +96,7 @@ func validateLoginRequest(req *ssov1.LoginRequest) error {
 	return nil
 }
 
-func validateRegisterRequest(req *ssov1.RegisterRequest) error {
+func validateRegisterRequest(req *authv1.RegisterRequest) error {
 	if req.Email == "" {
 		return status.Error(codes.InvalidArgument, "email is required")
 	}
@@ -108,7 +108,7 @@ func validateRegisterRequest(req *ssov1.RegisterRequest) error {
 	return nil
 }
 
-func validateIsAdminRequest(req *ssov1.IsAdminRequest) error {
+func validateIsAdminRequest(req *authv1.IsAdminRequest) error {
 	if req.UserId == 0 {
 		return status.Error(codes.InvalidArgument, "user_id is required")
 	}
