@@ -22,7 +22,10 @@ func main() {
 	log := newLogger(cfg.Env)
 	log.Info("starting application", slog.Any("config", cfg))
 
-	application := app.New(log, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenTTL)
+	application, err := app.New(log, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenTTL)
+	if err != nil {
+		panic(err)
+	}
 
 	go application.GRPCApp.MustRun()
 

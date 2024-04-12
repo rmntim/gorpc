@@ -5,6 +5,8 @@ import (
 	"time"
 
 	grpcapp "github.com/rmntim/sso/internal/app/grpc"
+	"github.com/rmntim/sso/internal/services/auth"
+	"github.com/rmntim/sso/internal/storage/postgres"
 )
 
 type App struct {
@@ -16,14 +18,20 @@ func New(
 	grpcPort int,
 	storagePath string,
 	tokenTTL time.Duration,
-) *App {
-	// TODO: init storage
+) (*App, error) {
+	storage, err := postgres.New(storagePath)
+	if err != nil {
+		return nil, err
+	}
 
-	// TODO: init auth service
+	if err := storage.Migrate(); err != nil {
+		return nil, err
+	}
 
-	grpcApp := grpcapp.New(logger, grpcPort)
+	authService := auth.New(logger, storage, storage, storage, tokenTTL)
+	grpcApp := grpcapp.New(logger, authService, grpcPort)
 
 	return &App{
 		GRPCApp: grpcApp,
-	}
+	}, nil
 }
