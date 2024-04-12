@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	authv1 "github.com/rmntim/sso/contracts/gen/go/auth/v1"
+	"github.com/rmntim/sso/internal/services/auth"
+	"github.com/rmntim/sso/internal/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,7 +43,9 @@ func (s *serverAPI) Login(ctx context.Context, req *authv1.LoginRequest) (*authv
 
 	token, err := s.auth.Login(ctx, req.Email, req.Password, int(req.AppId))
 	if err != nil {
-		// TODO: handle error type
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.InvalidArgument, "invalid credentials")
+		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
@@ -56,7 +61,9 @@ func (s *serverAPI) Register(ctx context.Context, req *authv1.RegisterRequest) (
 
 	userId, err := s.auth.Register(ctx, req.Email, req.Password)
 	if err != nil {
-		// TODO: handle error type
+		if errors.Is(err, storage.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, "user already exists")
+		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
@@ -72,6 +79,9 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *authv1.IsAdminRequest) (*a
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.UserId)
 	if err != nil {
+		if errors.Is(err, storage.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
