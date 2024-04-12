@@ -31,12 +31,12 @@ type UserSaver interface {
 }
 
 type UserProvider interface {
-	User(ctx context.Context, email string) (models.User, error)
+	User(ctx context.Context, email string) (*models.User, error)
 	IsAdmin(ctx context.Context, userId int64) (bool, error)
 }
 
 type AppProvider interface {
-	App(ctx context.Context, appId int) (models.App, error)
+	App(ctx context.Context, appId int) (*models.App, error)
 }
 
 var (

@@ -4,7 +4,10 @@ go 1.22.0
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.22.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0
@@ -12,7 +15,6 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/golang-migrate/migrate/v4 v4.17.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
