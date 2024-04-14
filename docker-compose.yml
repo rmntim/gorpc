@@ -6,6 +6,8 @@ services:
     ports:
       - "6969:6969"
     restart: unless-stopped
+    environment:
+      CONFIG_PATH: config.yaml
     depends_on:
       - postgres
     networks:
