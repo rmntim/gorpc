@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     environment:
       CONFIG_PATH: config.yaml
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/sso?sslmode=disable
     depends_on:
       - postgres
     networks:
